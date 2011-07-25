@@ -1,0 +1,1 @@
+mvn exec:java -Dexec.mainClass=org.acaro.dbpedia4neo.inserter.DBpediaLoader -Dexec.args="instance_types_de.nt"
