@@ -1,4 +1,5 @@
 package org.tinkerpop.rdf;
+
 import info.aduna.iteration.CloseableIteration;
 
 import java.io.File;
@@ -20,47 +21,60 @@ import org.openrdf.sail.SailException;
 
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
-import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper;
-import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager;
-
-
 
 public class ImportNTTest
 {
 
     @Test
-    public void importBerlinAndQuery() throws Exception {
-        Neo4jGraph neo = new Neo4jGraph("target/db");
-        Sail sail = new GraphSail(neo);
+    public void importBerlinAndQuery() throws Exception
+    {
+        Neo4jGraph neo = new Neo4jGraph( "target/db" );
+        neo.setMaxBufferSize( 5000 );
+        Sail sail = new GraphSail( neo );
         sail.initialize();
-        System.out.println("initialized");
-        loadTriples( neo, sail );
-        String queryString = "" +
-        		"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-        		"PREFIX rdfs:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> " +
-                "SELECT ?product ?label"+
-                "WHERE { " +
-                "?product rdf:type bsbm:Product ."+ //TODO: move this line one down and get no failure
-                "?product rdfs:label ?label ."+
-                "FILTER regex(?label, 'r')}";
+        System.out.println( "initialized" );
+        // loadTriples( neo, sail );
+        String queryString = ""
+                             + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+                             + "PREFIX rdfs:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+                             + "PREFIX bsbm: <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/> "
+                             + "SELECT ?product ?label" + "WHERE { "
+                             + "?product rdfs:label ?label ."
+                             + "?product rdf:type bsbm:Product ."
+                             + "FILTER regex(?label, 'r')}";
         SPARQLParser parser = new SPARQLParser();
-        ParsedQuery query = null ;
+        ParsedQuery query = null;
         CloseableIteration<? extends BindingSet, QueryEvaluationException> sparqlResults;
 
-        try {
-         query = parser.parseQuery(queryString, "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/");
-       }
-        catch (MalformedQueryException e) {System.out.println ("MalformeSystem.out.printlndQueryException " + e.getMessage()); }
-        try {
-             sparqlResults = sail.getConnection().evaluate(query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
-         while (sparqlResults.hasNext()) {
-             System.out.println("-------------");
-             System.out.println("Result: " + sparqlResults.next());
-             }
+        try
+        {
+            query = parser.parseQuery( queryString,
+                    "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/" );
         }
-         catch (QueryEvaluationException e) {System.out.println ("QueryEvaluationException " + e.getMessage()); }
-         catch (SailException e) {System.out.println ("SailException " + e.getMessage()); }
+        catch ( MalformedQueryException e )
+        {
+            System.out.println( "MalformeSystem.out.printlndQueryException "
+                                + e.getMessage() );
+        }
+        try
+        {
+            sparqlResults = sail.getConnection().evaluate(
+                    query.getTupleExpr(), query.getDataset(),
+                    new EmptyBindingSet(), false );
+            while ( sparqlResults.hasNext() )
+            {
+                System.out.println( "-------------" );
+                System.out.println( "Result: " + sparqlResults.next() );
+            }
+        }
+        catch ( QueryEvaluationException e )
+        {
+            System.out.println( "QueryEvaluationException " + e.getMessage() );
+        }
+        catch ( SailException e )
+        {
+            System.out.println( "SailException " + e.getMessage() );
+        }
         sail.shutDown();
 
     }
@@ -69,11 +83,10 @@ public class ImportNTTest
             throws RDFParseException, RDFHandlerException,
             FileNotFoundException, IOException, SailException
     {
-        CommitManager manager = TransactionalGraphHelper.createCommitManager(neo, 10000);
-        File file = new File("berlin_nt_100.nt");
-            System.out.println("Loading " + file + ": ");
-            DBpediaLoader.loadFile(file.getPath(), sail.getConnection(), sail.getValueFactory(), manager);
-            System.out.print('\n');
-        manager.close();
+        File file = new File( "berlin_nt_100.nt" );
+        System.out.println( "Loading " + file + ": " );
+        DBpediaLoader.loadFile( file.getPath(), sail.getConnection(),
+                sail.getValueFactory() );
+        System.out.print( '\n' );
     }
 }

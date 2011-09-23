@@ -6,15 +6,11 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 
-import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager;
-
 public class TripleHandler implements RDFHandler {
 	private SailConnection sc;
-	private CommitManager manager;
 	
-	public TripleHandler(SailConnection sc, CommitManager manager) { 
+	public TripleHandler(SailConnection sc) { 
 		this.sc = sc;
-		this.manager = manager;
 	}
 
 	public void handleComment(String arg0) throws RDFHandlerException {
@@ -32,9 +28,6 @@ public class TripleHandler implements RDFHandler {
 				return;
 			
 			sc.addStatement(arg0.getSubject(), arg0.getPredicate(), arg0.getObject());
-			manager.incrCounter();
-			if (manager.atCommit())
-				System.out.print(".");
 		} catch (SailException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
