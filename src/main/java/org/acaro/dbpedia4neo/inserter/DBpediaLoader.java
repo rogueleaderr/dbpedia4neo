@@ -40,7 +40,7 @@ public class DBpediaLoader
     	sail.shutDown();
     }
 
-	private static void loadFile(final String file, SailConnection sc, ValueFactory vf, CommitManager manager) throws RDFParseException, RDFHandlerException, FileNotFoundException, IOException {
+	public static void loadFile(final String file, SailConnection sc, ValueFactory vf, CommitManager manager) throws RDFParseException, RDFHandlerException, FileNotFoundException, IOException {
 		NTriplesParser parser = new NTriplesParser(vf);
 		TripleHandler handler = new TripleHandler(sc, manager);
 		parser.setRDFHandler(handler);
