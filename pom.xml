@@ -7,6 +7,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<properties>
 		<jettyVersion>7.2.2.v20101205</jettyVersion>
+        <sesame.version>2.5.0</sesame.version>
 	</properties>
 	<name>dbpedia4neo</name>
 	<url>http://maven.apache.org</url>
@@ -52,17 +53,17 @@
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-rio-ntriples</artifactId>
-			<version>2.3.2</version>
+			<version>${sesame.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-api</artifactId>
-			<version>2.3.2</version>
+			<version>${sesame.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openrdf.sesame</groupId>
 			<artifactId>sesame-repository-sail</artifactId>
-			<version>2.3.2</version>
+			<version>${sesame.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
