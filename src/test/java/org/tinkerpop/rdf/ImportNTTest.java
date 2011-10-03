@@ -22,6 +22,7 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.Sail;
+import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
@@ -29,7 +30,11 @@ import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 public class ImportNTTest
 {
+    
 
+    /**
+     * the queries are coming from http://www4.wiwiss.fu-berlin.de/bizer/BerlinSPARQLBenchmark/spec/ExploreUseCase/index.html
+     */
     @Test
     public void importBerlinAndQuery() throws Exception
     {
@@ -39,7 +44,7 @@ public class ImportNTTest
         sail.initialize();
         SailRepositoryConnection connection = new SailRepository( sail ).getConnection();
         System.out.println( "initialized" );
-//        loadTriples( neo, connection );
+        loadTriples( neo, connection );
         Map<String, String> queries = new HashMap<String, String>();
         queries.put(
                 "q1",
@@ -277,17 +282,18 @@ public class ImportNTTest
         QueryParser parser = new SPARQLParserFactory().getParser();
         ParsedQuery query = null;
         CloseableIteration<? extends BindingSet, QueryEvaluationException> sparqlResults;
+        SailConnection conn = sail.getConnection();
         for ( String key : queries.keySet() )
             try
             {
                 query = parser.parseQuery( queries.get( key ),
                         "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/" );
-                sparqlResults = sail.getConnection().evaluate(
+                sparqlResults = conn.evaluate(
                         query.getTupleExpr(), query.getDataset(),
                         new EmptyBindingSet(), false );
+                System.out.println( "Results --- " + key );
                 while ( sparqlResults.hasNext() )
                 {
-                    System.out.println( "------------- " + key );
                     System.out.println( "Result: " + sparqlResults.next() );
                 }
             }
