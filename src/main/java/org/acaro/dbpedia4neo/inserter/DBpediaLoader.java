@@ -15,26 +15,73 @@ import org.openrdf.sail.Sail;
 import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 
+import com.tinkerpop.blueprints.pgm.TransactionalGraph;
+import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
+//import com.tinkerpop.blueprints.pgm.impls.neo4jbatch.Neo4jBatchGraph;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 public class DBpediaLoader 
 {
-    public static void main( String[] args ) 
+	private static final String LOAD_FROM_DIR = "/Users/rogueleaderr/Data/mapping_dir_2";
+    private static final String DB_DIR = "/Users/rogueleaderr/Data/var/dbpedia_peter_big_test_3";
+	
+	public static void main( String[] args ) 
     	throws SailException, RDFParseException, RDFHandlerException, FileNotFoundException, IOException
     {
-    	Neo4jGraph neo = new Neo4jGraph("dbpedia4neo");
-    	neo.setMaxBufferSize( 1000 );
-    	Sail sail = new GraphSail(neo);
+		
+		File dir = new File(LOAD_FROM_DIR);
+    	String[] fileList = dir.list();
+		
+		
+		Neo4jGraph neo = new Neo4jGraph(DB_DIR);
+		
+    	neo.setMaxBufferSize( 50000 );
+    	registerShutdownHook( neo );
+    	neo.startTransaction();
+    	
+    	GraphSail sail = new GraphSail(neo);
+    	
     	sail.initialize();
+    	
+    	//con.setAutoCommit(false);
     	System.out.println("initialized");
-
-    	for (String file: args) {
-    		System.out.println("Loading " + file + ": ");
-    		loadFile(file, sail.getConnection(), sail.getValueFactory());
-    		System.out.print('\n');
+    	long start, duration;
+    	boolean first = true;
+    	
+    	if (dir.isDirectory()){
+    		for (String child : fileList) {
+    			
+    			if (".".equals(child) || "..".equals(child) || ".DS_Store".equals(child)) {
+    			      continue;  // Ignore the self and parent aliases.
+    			    }
+    			
+    			
+    			
+    			SailConnection con = sail.getConnection();
+    			if (first == false){
+    				neo.startTransaction();	
+    			}
+    			first = false;		
+    			
+    			start = System.currentTimeMillis();
+    			String childFile = (LOAD_FROM_DIR + "/" + child);
+    			System.out.println("Uploading: " + child);
+    		    		
+    			loadFile(childFile, con, sail.getValueFactory());
+    			
+    			duration = System.currentTimeMillis() - start;
+    			System.out.print("Upload took " + duration + '\n');
+    			
+    			neo.stopTransaction(Conclusion.SUCCESS);
+    			con.commit();
+    	    	con.close();		
+    	
+    		}
     	}
+    	
     	sail.shutDown();
+    	
     }
 
 	public static void loadFile(final String file, SailConnection sc, ValueFactory vf) throws RDFParseException, RDFHandlerException, FileNotFoundException, IOException {
@@ -64,5 +111,20 @@ public class DBpediaLoader
 			
 		});
 		parser.parse(new BufferedInputStream(new FileInputStream(new File(file))), "http://dbpedia.org/");
+	}
+	
+	private static void registerShutdownHook( final Neo4jGraph graphDb )
+	{
+	    // Registers a shutdown hook for the Neo4j instance so that it
+	    // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+	    // running example before it's completed)
+	    Runtime.getRuntime().addShutdownHook( new Thread()
+	    {
+	        @Override
+	        public void run()
+	        {
+	            graphDb.shutdown();
+	        }
+	    } );
 	}
 }
