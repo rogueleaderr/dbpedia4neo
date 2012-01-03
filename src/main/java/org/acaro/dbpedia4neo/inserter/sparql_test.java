@@ -47,7 +47,7 @@ public class sparql_test {
 	}
 	public static void main(String[] args) {
 		
-		final Neo4jGraph neo  = new Neo4jGraph("/Users/rogueleaderr/Data/var/dbpedia4neo_small_test_4");
+		final Neo4jGraph neo  = new Neo4jGraph("/Users/rogueleaderr/Data/var/dbpedia_peter_big_test_3");
 		registerShutdownHook( neo );
 		final GraphSail gsail = new GraphSail(neo);
 		final SailGraph sail  = new SailGraph(gsail);

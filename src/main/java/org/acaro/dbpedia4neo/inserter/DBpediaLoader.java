@@ -23,8 +23,8 @@ import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 public class DBpediaLoader 
 {
-	private static final String LOAD_FROM_DIR = "/Users/rogueleaderr/Data/mapping_dir_2";
-    private static final String DB_DIR = "/Users/rogueleaderr/Data/var/dbpedia_peter_big_test_3";
+	private static final String LOAD_FROM_DIR = "/Users/rogueleaderr/Data/mapping_dir_a/3";
+    private static final String DB_DIR = "/Users/rogueleaderr/Data/var/dbpedia_peter_big_split";
 	
 	public static void main( String[] args ) 
     	throws SailException, RDFParseException, RDFHandlerException, FileNotFoundException, IOException
@@ -36,7 +36,7 @@ public class DBpediaLoader
 		
 		Neo4jGraph neo = new Neo4jGraph(DB_DIR);
 		
-    	neo.setMaxBufferSize( 50000 );
+    	neo.setMaxBufferSize( 30000 );
     	registerShutdownHook( neo );
     	neo.startTransaction();
     	
@@ -76,6 +76,7 @@ public class DBpediaLoader
     			neo.stopTransaction(Conclusion.SUCCESS);
     			con.commit();
     	    	con.close();		
+    	    	System.gc();
     	
     		}
     	}
